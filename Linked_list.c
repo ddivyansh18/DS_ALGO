@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <malloc.h>
+#include <stdbool.h>
 
 struct node
 {
@@ -23,6 +24,12 @@ struct node *delete_node(struct node *);
 struct node *delete_after(struct node *);
 struct node *delete_list(struct node *);
 struct node *sort_list(struct node *);
+struct node *print_middle(struct node *);
+struct node *delete_middle(struct node *);
+struct node *remove_duplicates(struct node *);
+struct node *reverse_list(struct node *);
+struct node *rotate_list(struct node *);
+struct node *check_palindrome(struct node *);
 
 int main()
 {
@@ -42,7 +49,13 @@ int main()
         printf("\n10: Delete a node after a given node");
         printf("\n11: Delete the entire list");
         printf("\n12: Sort the list");
-        printf("\n13: EXIT");
+        printf("\n13: Print middle node");
+        printf("\n14: Delete middle node");
+        printf("\n15: Remove duplicates from sorted linked list");
+        printf("\n16: Reverse the list");
+        printf("\n17: Rotate the list counter-clockwise by k nodes");
+        printf("\n18: Check if list is palindrome");
+        printf("\n19: EXIT");
         printf("\n\nEnter your option : ");
         scanf("%d", &option);
 
@@ -74,9 +87,23 @@ int main()
                      break;
             case 12: start = sort_list(start);
                      break;
-
+            case 13: start = print_middle(start);
+                     break;
+            case 14: start = delete_middle(start);
+                     break;
+            case 15: start = remove_duplicates(start);
+                     printf("\nDUPLICATES REMOVED");
+                     break;
+            case 16: start = reverse_list(start);
+                     printf("\nLIST REVERSED");
+                     break;
+            case 17: start = rotate_list(start);
+                     printf("\nLIST ROTATED");
+                     break;
+            case 18: start = check_palindrome(start);
+                     break;
         }
-        }while(option!=13);
+        }while(option!=19);
         getch();
         return 0;
 
@@ -320,3 +347,149 @@ int main()
 
         return start;
     }
+
+struct node *print_middle(struct node *start)
+{
+    struct node *slow_ptr = start;
+    struct node *fast_ptr = start;
+
+    if(start != NULL)
+    {
+        while(fast_ptr != NULL && fast_ptr -> next != NULL)
+        {
+            fast_ptr = fast_ptr -> next ->next;
+            slow_ptr = slow_ptr -> next;
+        }
+        printf("\nMiddle element is : %d", slow_ptr -> data);
+    }
+    return start;
+}
+
+struct node *delete_middle(struct node *start)
+{
+    if(start == NULL)
+        return start;
+
+    if(start -> next == NULL)
+    {
+        free(start);
+        return NULL;
+    }
+
+    struct node *slow_ptr = start;
+    struct node *fast_ptr = start;
+    struct node *prev = start;
+
+    while(fast_ptr != NULL && fast_ptr -> next != NULL)
+    {
+        fast_ptr = fast_ptr -> next -> next;
+        prev = slow_ptr;
+        slow_ptr = slow_ptr -> next;
+    }
+
+    prev -> next = slow_ptr -> next;
+    free(slow_ptr);
+    printf("\nMIDDLE NODE DELETED");
+    return start;
+}
+
+struct node *remove_duplicates(struct node *start)
+{
+    struct node *current = start;
+    struct node *next_next;
+
+    if(current == NULL)
+        return start;
+
+    while(current -> next != NULL)
+    {
+        if(current -> data == current -> next -> data)
+        {
+            next_next = current -> next -> next;
+            free(current -> next);
+            current -> next = next_next;
+        }
+        else
+        current = current -> next;
+    }
+
+    return start;
+}
+
+struct node* reverse_list(struct node *start)
+{
+    struct node* prev = NULL;
+    struct node *current = start;
+    struct node* next;
+
+    while(current != NULL)
+    {
+        next = current -> next;
+        current -> next = prev;
+        prev = current;
+        current = next;
+    }
+    start = prev;
+    return start;
+}
+
+struct node* rotate_list(struct node *start)
+{
+    int k;
+    printf("\nEnter the value of k : ");
+    scanf("%d", &k);
+
+    if(k == 0)
+        return start;
+
+    struct node *current = start;
+    int count =1;
+
+    while(count < k && current != NULL)
+    {
+        current = current -> next;
+        count++;
+    }
+
+    if(current == NULL)
+        return start;
+
+    struct node *kthnode = current;
+    while(current -> next != NULL)
+        current = current -> next;
+
+    current -> next = start;
+    start = kthnode -> next;
+    kthnode -> next = NULL;
+    return start;
+}
+
+bool is_palindrome_util(struct node **left, struct node *right)
+{
+    if(right == NULL)
+        return true;
+
+    bool isp = is_palindrome_util(left, right -> next);
+    if(isp == false)
+        return false;
+
+    bool isp1 = (right -> data == (*left) -> data);
+    *left = (*left) -> next;
+
+    return isp1;
+}
+
+bool is_palindrome(struct node *start)
+{
+    is_palindrome_util(&start, start);
+}
+
+struct node *check_palindrome(struct node *start)
+{
+    if(is_palindrome(start))
+        printf("\nLIST IS PALINDROME");
+    else
+        printf("\nLIST IS NOT PALINDROME");
+
+    return start;
+}
